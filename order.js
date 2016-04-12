@@ -42,10 +42,33 @@
 		var scripts = groupScripts();
 		var inlineScripts = getScriptsByType(scripts, 'inline');
 		var blockingScripts = getScriptsByType(scripts, 'blocking');
-
+		var entries = [];
 		var orderedScripts = [];
 		// Inlinescripts + blockingscripts sorted by order 
-		orderedScripts = inlineScripts.concat(blockingScripts).sort(function(a,b){return a.count > b.count});
+		orderedScripts = inlineScripts.concat(blockingScripts).sort(function(a,b){return a.count - b.count});
+
+		// Async Scripts Order - can be easily measured using Resource Timing API
+		var tempAsyncArr = [];
+		var asyncScripts = getScriptsByType(scripts, 'async');
+		if(w.performance && w.performance.getEntriesByType) {
+			entries = w.performance.getEntriesByType('resource');
+
+			for (var i = 0; i < entries.length; i++) {
+				for(var j = 0; j < asyncScripts.length; j++) {
+					if (entries[i].name === asyncScripts[j].name) {
+						asyncScripts[j].duration = entries[i].duration;
+						tempAsyncArr.push(asyncScripts[j])
+					}	
+				}
+			}
+			tempAsyncArr.sort(function(a,b){return a.duration - b.duration});
+		} else {
+			console.log('Async Script Execution Order will not be measured - No Resource Timing API Support ')
+		}
+		orderedScripts = orderedScripts.concat(tempAsyncArr);
+		tempAsyncArr = null;
+
+		// Defer Scripts
 
 		console.table(orderedScripts);
 	}
