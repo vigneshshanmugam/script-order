@@ -18,7 +18,10 @@
 					scriptObj.blocking.push(scripts[i].src);
 				}
 			} else {
-				scriptObj.inline.push(scripts[i].innerHTML);
+				// Todo - Indentify dynamically inserted scripts
+				if (scripts[i].innerHTML.indexOf('src') <= -1) {
+					scriptObj.inline.push(scripts[i].innerHTML);
+				}
 			}
 		}
 	}
