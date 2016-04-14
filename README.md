@@ -1,6 +1,6 @@
 # script-order
 
-Report the order in which script tags were executed on a page.
+Report the order in which all the script tags were executed on a page.
 
 Work in progress.
 

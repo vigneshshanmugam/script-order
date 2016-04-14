@@ -69,6 +69,13 @@
 		tempAsyncArr = null;
 
 		// Defer Scripts
+		var deferredScripts = getScriptsByType(scripts, 'defer');
+
+		// Todo - strategy to figure out defer and async 
+		orderedScripts = orderedScripts.concat(deferredScripts);
+
+		// Sort them based on order which they are discovered in HTML
+		orderedScripts.sort(function(a,b){return a.count - b.count});
 
 		console.table(orderedScripts);
 	}
