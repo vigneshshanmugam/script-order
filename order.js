@@ -38,6 +38,48 @@
 		return scripts[type];
 	}
 
+	function interleave(asyncScripts, deferScripts) {
+	  	var asyncPointer = 0;
+	  	var deferPointer = 0;
+	  	var newArr = [];
+	  	var asyncEle, deferEle;
+	  
+	  	while (asyncPointer < asyncScripts.length) {
+		    asyncEle = asyncScripts[asyncPointer];
+		    deferEle = deferScripts[deferPointer];
+
+		    if (!!deferEle) {
+		    	if (asyncEle.duration < deferEle.duration) {
+					newArr.push(asyncEle);
+					asyncPointer++;
+				} else {
+					newArr.push(deferEle);
+					deferPointer++;
+				}
+		    } else {
+		    	newArr.push(asyncEle);
+		    	asyncPointer++;
+		    }
+		}
+		while (deferPointer < deferScripts.length) {
+			newArr.push(deferScripts[deferPointer]);
+			deferPointer++;
+	    }
+
+	    return newArr;
+	}
+
+	function addDurationToScripts(entries, scripts) {
+		for (var i = 0; i < entries.length; i++) {
+			for(var j = 0; j < scripts.length; j++) {
+				if (entries[i].name === scripts[j].name) {
+					scripts[j].duration = entries[i].duration;
+				}
+			}
+		}
+		return scripts;
+	}
+
 	function getScriptOrder() {
 		var scripts = groupScripts();
 		var inlineScripts = getScriptsByType(scripts, 'inline');
@@ -48,34 +90,26 @@
 		orderedScripts = inlineScripts.concat(blockingScripts).sort(function(a,b){return a.count - b.count});
 
 		// Async Scripts Order - can be easily measured using Resource Timing API
-		var tempAsyncArr = [];
 		var asyncScripts = getScriptsByType(scripts, 'async');
+
+		// Defer Scripts - Ordered execution
+		var deferredScripts = getScriptsByType(scripts, 'defer');
+
 		if(w.performance && w.performance.getEntriesByType) {
 			entries = w.performance.getEntriesByType('resource');
 
-			for (var i = 0; i < entries.length; i++) {
-				for(var j = 0; j < asyncScripts.length; j++) {
-					if (entries[i].name === asyncScripts[j].name) {
-						asyncScripts[j].duration = entries[i].duration;
-						tempAsyncArr.push(asyncScripts[j])
-					}	
-				}
-			}
-			tempAsyncArr.sort(function(a,b){return a.duration - b.duration});
+			asyncScripts = addDurationToScripts(entries, asyncScripts);
+			deferredScripts = addDurationToScripts(entries, deferredScripts);
+
+			// We need this for interleaving
+			asyncScripts.sort(function(a,b){return a.duration - b.duration});
 		} else {
-			console.log('Async Script Execution Order will not be measured - No Resource Timing API Support ')
+			console.log('Async & Defer Script Execution Order will not be measured - No Resource Timing API Support ')
 		}
-		orderedScripts = orderedScripts.concat(tempAsyncArr);
-		tempAsyncArr = null;
-
-		// Defer Scripts
-		var deferredScripts = getScriptsByType(scripts, 'defer');
-
-		// Todo - strategy to figure out defer and async 
-		orderedScripts = orderedScripts.concat(deferredScripts);
-
-		// Sort them based on order which they are discovered in HTML
-		orderedScripts.sort(function(a,b){return a.count - b.count});
+		
+		// // We need to interleave async scripts between deferred scripts
+		var interleavedScripts = interleave(asyncScripts, deferredScripts);
+		orderedScripts = orderedScripts.concat(interleavedScripts);
 
 		console.table(orderedScripts);
 	}
