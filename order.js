@@ -11,6 +11,12 @@
 
 		for (var i = 0; i < scripts.length; i++) {
 			order = i + 1;
+
+			// Remove the bookmarklet script
+			if(scripts[i].src.indexOf('/order.js') !== -1) {
+				continue;
+			}
+
 			if (scripts[i].src) {
 				// scripts with async & defer set to true is considered to be async
 				if(scripts[i].async) {
@@ -82,6 +88,7 @@
 
 	function getScriptOrder() {
 		var scripts = groupScripts();
+
 		var inlineScripts = getScriptsByType(scripts, 'inline');
 		var blockingScripts = getScriptsByType(scripts, 'blocking');
 		var entries = [];
