@@ -1,8 +1,14 @@
 # script-order
 
-Report the order in which all the script tags were executed on a page.
+Report the order in which all script tags were executed on a page.
 
-Work in progress.
+Just add the bookmarklet below to your bookmarks bar.
+
+```
+javascript:(function(d){var el=d.createElement('script');el.type='text/javascript';el.src='//cdn.rawgit.com/vigneshshanmugam/script-order/master/order.js';d.getElementsByTagName('body')[0].appendChild(el);})(window.document);
+```
+
+Check your devtools console tab to see the order. 
 
 ### Types
 
