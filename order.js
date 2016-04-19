@@ -111,7 +111,7 @@
 		var interleavedScripts = interleave(asyncScripts, deferredScripts);
 		orderedScripts = orderedScripts.concat(interleavedScripts);
 
-		console.table(orderedScripts);
+		console.table(orderedScripts, 'name');
 	}
 
 	getScriptOrder();
