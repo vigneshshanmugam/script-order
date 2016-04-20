@@ -44,35 +44,28 @@
 		return scripts[type];
 	}
 
-	function interleave(asyncScripts, deferScripts) {
-	  	var asyncPointer = 0;
-	  	var deferPointer = 0;
-	  	var newArr = [];
-	  	var asyncEle, deferEle;
-	  
-	  	while (asyncPointer < asyncScripts.length) {
-		    asyncEle = asyncScripts[asyncPointer];
-		    deferEle = deferScripts[deferPointer];
+	function interleave(source, destination) {
+		var lengthOfArr = source.length + destination.length;
+		var srcPtr = 0;
+		var destPtr = 0;
+		var counter = 0;
 
-		    if (!!deferEle) {
-		    	if (asyncEle.duration < deferEle.duration) {
-					newArr.push(asyncEle);
-					asyncPointer++;
-				} else {
-					newArr.push(deferEle);
-					deferPointer++;
-				}
-		    } else {
-		    	newArr.push(asyncEle);
-		    	asyncPointer++;
-		    }
+		while (counter <= lengthOfArr && destPtr < destination.length) {
+			if (source[srcPtr].duration <= destination[destPtr].duration) {
+				destination.splice(destPtr, 0, source[srcPtr]);
+				srcPtr++;
+			} else {
+				destPtr++;
+			}
+			counter++;
 		}
-		while (deferPointer < deferScripts.length) {
-			newArr.push(deferScripts[deferPointer]);
-			deferPointer++;
-	    }
 
-	    return newArr;
+		while (srcPtr < source.length) {
+			destination.push(source[srcPtr]);
+			srcPtr++;
+		}
+
+		return destination;
 	}
 
 	function addDurationToScripts(entries, scripts) {
