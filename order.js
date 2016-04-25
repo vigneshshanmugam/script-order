@@ -118,13 +118,13 @@
 	function drawUI() {
 		var orderedScripts = getScriptsInOrder();
 		var container = d.createElement('div');
-		container.style.cssText = 'background:#fff;border: 2px solid #000;position:absolute;top:0;left:0;right:0;z-index:99999;margin:0px 8px;padding:0px;';
+		container.style.cssText = 'background:#fff;border: 2px solid #000;position:absolute;top:0;left:0;right:0;z-index:99999;margin:0px 5px;';
 		var ul = d.createElement('ul'), li;
-		ul.style.cssText = 'list-style: none;';
+		ul.style.cssText = 'list-style: none;white-space: nowrap;;line-height: 28px;margin: 0;padding:10px';
 		orderedScripts.forEach(function(script, index) {
 			li = d.createElement('li');
 			li.innerHTML =  (index+1) + ' - ' + script.name;
-			li.style.cssText = 'margin: 20px;overflow: hidden;white-space: no-wrap;text-overflow: ellipsis';
+			li.style.cssText = 'overflow: hidden;text-overflow: ellipsis;';
 			ul.appendChild(li);
 		});
 		container.appendChild(ul);
