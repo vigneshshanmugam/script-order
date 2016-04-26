@@ -29,7 +29,7 @@
 			} else {
 				// Todo - Indentify dynamically inserted scripts in better way
 				if (scripts[i].innerHTML.indexOf('src') <= -1) {
-					scriptObj.inline.push({'name': 'Inline Script - ' + scripts[i].innerHTML, count: order });
+					scriptObj.inline.push({'name': scripts[i].innerHTML, count: order });
 				}
 			}
 		}
@@ -111,17 +111,30 @@
 		var interleavedScripts = interleave(asyncScripts, deferredScripts);
 		orderedScripts = orderedScripts.concat(interleavedScripts);
 
-		console.table(orderedScripts, 'name');
 		return orderedScripts;
+	}
+
+	function removeDuplicatesAndEmptyScripts(scripts) {
+		return scripts.filter(function(ele, index) {
+			if (!ele.name) {
+				return false;
+			}
+			if (scripts[index+1] && ele.name === scripts[index+1].name) {
+				return false;
+			}
+			return true;
+		});
 	}
 
 	function drawUI() {
 		var orderedScripts = getScriptsInOrder();
+		var scripts = removeDuplicatesAndEmptyScripts(orderedScripts);
+		console.table(scripts, 'name');
 		var container = d.createElement('div');
 		container.style.cssText = 'background:#fff;border: 2px solid #000;position:absolute;top:0;left:0;right:0;z-index:99999;margin:0px 5px;';
 		var ul = d.createElement('ul'), li;
 		ul.style.cssText = 'list-style: none;white-space: nowrap;;line-height: 28px;margin: 0;padding:10px';
-		orderedScripts.forEach(function(script, index) {
+		scripts.forEach(function(script, index) {
 			li = d.createElement('li');
 			li.innerHTML =  (index+1) + ' - ' + script.name;
 			li.style.cssText = 'overflow: hidden;text-overflow: ellipsis;';
