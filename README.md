@@ -24,7 +24,7 @@ Check your devtools console tab to see the order.
 * `External Sync` - Synchronous, Ordered and parser blocking
 * `External Async` - Asynchronous, Unordered and non-blocking 
 * `External Defer` - Non-blocking, but will be executed before DOMContentLoaded event
-* `Dynamic` - Not identified by speculative parser. 
+* `Dynamic` - Not identified by speculative/lookahead parser. 
 
 ### Gotchas
 
@@ -34,4 +34,4 @@ Check your devtools console tab to see the order.
 ### Issues
 
 - Have not tested preload behaviour yet
-- Speculative/Preload Parser behaviour 
+- Speculative/Lookahead Parser behaviour 
