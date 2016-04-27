@@ -30,8 +30,8 @@ A UI will be shown on the page, You can also check devtools console tab to see t
 
 ### Gotchas
 
-- Works only if `Resource Timing API` is available (Since we need to interleve async/defer scripts execution with timing information).
-- Does not work for scripts that are blocked(Ad blockers), CSP and Mixed contents (PerformanceTimingEntry will be empty for them).
+- Works only if `Resource Timing API` is available (since we need to interleve async/defer scripts execution with timing information).
+- Scripts that are blocked(Ad blockers), CSP and Mixed contents are pushed to the end(because PerformanceTimingEntry Object is empty for them).
 
 ### Issues
 
