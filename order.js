@@ -20,16 +20,16 @@
 			if (scripts[i].src) {
 				// scripts with async & defer set to true is considered to be async
 				if(scripts[i].async) {
-					scriptObj.async.push({'name': scripts[i].src, count: order });
+					scriptObj.async.push({name: scripts[i].src, type: 'async', count: order });
 				} else if(scripts[i].defer) {
-					scriptObj.defer.push({'name': scripts[i].src, count: order });
+					scriptObj.defer.push({name: scripts[i].src, type: 'defer', count: order });
 				} else {
-					scriptObj.blocking.push({'name': scripts[i].src, count: order });
+					scriptObj.blocking.push({name: scripts[i].src, type: 'sync', count: order });
 				}
 			} else {
 				// Todo - Indentify dynamically inserted scripts in better way
 				if (scripts[i].innerHTML.indexOf('src') <= -1) {
-					scriptObj.inline.push({'name': scripts[i].innerHTML, count: order });
+					scriptObj.inline.push({'name': scripts[i].innerHTML, type: 'inline', count: order });
 				}
 			}
 		}
@@ -136,7 +136,7 @@
 		ul.style.cssText = 'list-style: none;white-space: nowrap;;line-height: 28px;margin: 0;padding:10px';
 		scripts.forEach(function(script, index) {
 			li = d.createElement('li');
-			li.innerHTML =  (index+1) + ' - ' + script.name;
+			li.innerHTML =  (index+1) + '. '+ script.type + ' - ' + script.name;
 			li.style.cssText = 'overflow: hidden;text-overflow: ellipsis;';
 			ul.appendChild(li);
 		});
