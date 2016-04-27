@@ -76,6 +76,16 @@
 				}
 			}
 		}
+
+		//Scripts that are blocked, CSP, mixed content
+		var j = 0;
+		while(j < scripts.length) {
+			// Hack - Put them to the end
+			if (!scripts[j].duration) {
+				scripts[j].duration = 99999;
+			}
+			j++;
+		}
 		return scripts;
 	}
 
@@ -101,10 +111,9 @@
 			asyncScripts = addDurationToScripts(entries, asyncScripts);
 			deferredScripts = addDurationToScripts(entries, deferredScripts);
 
-			// We need this for interleaving
 			asyncScripts.sort(function(a,b){return a.duration - b.duration});
 		} else {
-			console.log('Async & Defer Script Execution Order will not be measured - No Resource Timing API Support ')
+			console.log('Async & Defer Script Execution Order is not accurate - No Resource Timing API Support ')
 		}
 		
 		// // We need to interleave async scripts between deferred scripts
@@ -129,7 +138,6 @@
 	function drawUI() {
 		var orderedScripts = getScriptsInOrder();
 		var scripts = removeDuplicatesAndEmptyScripts(orderedScripts);
-		console.table(scripts, 'name');
 		var container = d.createElement('div');
 		container.style.cssText = 'background:#fff;border: 2px solid #000;position:absolute;top:0;left:0;right:0;z-index:99999;margin:0px 5px;';
 		var ul = d.createElement('ul'), li;
@@ -142,6 +150,7 @@
 		});
 		container.appendChild(ul);
 		d.body.appendChild(container);
+		console.table(scripts);
 	}
 
 	drawUI();

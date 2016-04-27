@@ -8,7 +8,9 @@ Just add the bookmarklet below to your bookmarks bar.
 javascript:(function(d){var el=d.createElement('script');el.type='text/javascript';el.src='//vigneshh.in/script-order/order.js';d.getElementsByTagName('body')[0].appendChild(el);})(window.document);
 ```
 
-Check your devtools console tab to see the order. 
+**Delete the cache before executing the bookmarlet**
+
+A UI will be shown on the page, You can also check devtools console tab to see the order. 
 
 ### Types
 
@@ -28,10 +30,10 @@ Check your devtools console tab to see the order.
 
 ### Gotchas
 
-- Works only if `Resource Timing API` is available (Since we need to interleve async/defer execution with timings).
-- Does not work with third party scripts where `Timing-Allow-Origin Header` is not present.
+- Works only if `Resource Timing API` is available (Since we need to interleve async/defer scripts execution with timing information).
+- Does not work for scripts that are blocked(Ad blockers), CSP and Mixed contents (PerformanceTimingEntry will be empty for them).
 
 ### Issues
 
 - Have not tested preload behaviour yet
-- Speculative/Lookahead Parser behaviour 
+- Not tested Server Push as well.
