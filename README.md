@@ -10,7 +10,12 @@ javascript:(function(d){var el=d.createElement('script');el.type='text/javascrip
 
 **Delete the cache before executing the bookmarlet**
 
-A UI will be shown on the page, You can also check devtools console tab to see the order. 
+A UI will be shown on the page like this.
+
+![Script Breakdown]
+(https://github.com/vigneshshanmugam/script-order/blob/master/breakdown.png)
+
+ You can also check devtools console tab to see the order. 
 
 ### Types
 
@@ -26,7 +31,7 @@ A UI will be shown on the page, You can also check devtools console tab to see t
 * `External Sync` - Synchronous, Ordered and parser blocking
 * `External Async` - Asynchronous, Unordered and non-blocking 
 * `External Defer` - Non-blocking, but will be executed before DOMContentLoaded event
-* `Dynamic` - Not identified by speculative/lookahead parser. 
+* `Dynamic` - Not identified by speculative/lookahead parser.
 
 ### Gotchas
 
