@@ -50,7 +50,7 @@
 		var destPtr = 0;
 		var counter = 0;
 
-		while (counter <= lengthOfArr && destPtr < destination.length) {
+		while (counter <= lengthOfArr && srcPtr < source.length && destPtr < destination.length) {
 			if (source[srcPtr].duration <= destination[destPtr].duration) {
 				destination.splice(destPtr, 0, source[srcPtr]);
 				srcPtr++;
