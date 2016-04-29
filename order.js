@@ -45,19 +45,16 @@
 	}
 
 	function interleave(source, destination) {
-		var lengthOfArr = source.length + destination.length;
 		var srcPtr = 0;
 		var destPtr = 0;
-		var counter = 0;
 
-		while (counter <= lengthOfArr && srcPtr < source.length && destPtr < destination.length) {
+		while (srcPtr < source.length && destPtr < destination.length) {
 			if (source[srcPtr].duration <= destination[destPtr].duration) {
 				destination.splice(destPtr, 0, source[srcPtr]);
 				srcPtr++;
 			} else {
 				destPtr++;
 			}
-			counter++;
 		}
 
 		while (srcPtr < source.length) {
@@ -111,6 +108,7 @@
 			asyncScripts = addDurationToScripts(entries, asyncScripts);
 			deferredScripts = addDurationToScripts(entries, deferredScripts);
 
+			// Executed as soon as they are available
 			asyncScripts.sort(function(a,b){return a.duration - b.duration});
 		} else {
 			console.log('Async & Defer Script Execution Order is not accurate - No Resource Timing API Support ')
