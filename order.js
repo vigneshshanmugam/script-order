@@ -65,21 +65,25 @@
 		return destination;
 	}
 
-	function addDurationToScripts(entries, scripts) {
+	function addTimingInfoToScripts(entries, scripts) {
 		for (var i = 0; i < entries.length; i++) {
 			for(var j = 0; j < scripts.length; j++) {
 				if (entries[i].name === scripts[j].name) {
 					scripts[j].duration = entries[i].duration;
+					scripts[j].startTime = entries[i].startTime;
 				}
 			}
 		}
 
-		//Scripts that are blocked, CSP, mixed content
+		// Scripts that are blocked, CSP, mixed content
 		var j = 0;
 		while(j < scripts.length) {
 			// Hack - Put them to the end
-			if (!scripts[j].duration) {
+			if (!scripts[j].duration || scripts[j].duration === 0) {
 				scripts[j].duration = 99999;
+			}
+			if (!scripts[j].startTime || scripts[j].startTime === 0) {
+				scripts[j].startTime = 99999;
 			}
 			j++;
 		}
@@ -105,11 +109,14 @@
 		if(w.performance && w.performance.getEntriesByType) {
 			entries = w.performance.getEntriesByType('resource');
 
-			asyncScripts = addDurationToScripts(entries, asyncScripts);
-			deferredScripts = addDurationToScripts(entries, deferredScripts);
+			asyncScripts = addTimingInfoToScripts(entries, asyncScripts);
+			deferredScripts = addTimingInfoToScripts(entries, deferredScripts);
 
 			// Executed as soon as they are available
 			asyncScripts.sort(function(a,b){return a.duration - b.duration});
+
+			// Defer guarentees ordered execution
+			deferredScripts.sort(function(a,b){return a.startTime - b.startTime});
 		} else {
 			console.log('Async & Defer Script Execution Order is not accurate - No Resource Timing API Support ')
 		}
