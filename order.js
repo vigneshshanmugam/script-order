@@ -69,7 +69,8 @@
 		for (var i = 0; i < entries.length; i++) {
 			for(var j = 0; j < scripts.length; j++) {
 				if (entries[i].name === scripts[j].name) {
-					scripts[j].duration = entries[i].duration;
+                    // Duration is specific to startTime
+					scripts[j].duration = entries[i].duration + entries[i].startTime;
 					scripts[j].startTime = entries[i].startTime;
 				}
 			}
@@ -102,8 +103,6 @@
 
 		// Async Scripts Order - can be easily measured using Resource Timing API
 		var asyncScripts = getScriptsByType(scripts, 'async');
-
-		// Defer Scripts - Ordered execution
 		var deferredScripts = getScriptsByType(scripts, 'defer');
 
 		if(w.performance && w.performance.getEntriesByType) {
