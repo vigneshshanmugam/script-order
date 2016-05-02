@@ -28,7 +28,7 @@
 				}
 			} else {
 				// Todo - Indentify dynamically inserted scripts in better way
-				if (scripts[i].innerHTML.indexOf('src') <= -1) {
+				if (scripts[i].innerHTML.indexOf('src') === -1) {
 					scriptObj.inline.push({'name': scripts[i].innerHTML, type: 'inline', count: order, color: 'orange' });
 				}
 			}
@@ -44,12 +44,12 @@
 		return scripts[type];
 	}
 
-	function interleave(source, destination) {
+	function interleave(source, destination, key) {
 		var srcPtr = 0;
 		var destPtr = 0;
 
 		while (srcPtr < source.length && destPtr < destination.length) {
-			if (source[srcPtr].duration <= destination[destPtr].duration) {
+			if (source[srcPtr][key] <= destination[destPtr][key]) {
 				destination.splice(destPtr, 0, source[srcPtr]);
 				srcPtr++;
 			} else {
@@ -70,7 +70,7 @@
 			for(var j = 0; j < scripts.length; j++) {
 				if (entries[i].name === scripts[j].name) {
                     // Duration is specific to startTime
-					scripts[j].duration = entries[i].duration + entries[i].startTime;
+					scripts[j].duration = entries[i].duration + entries[i].startTime; // same as responseEnd
 					scripts[j].startTime = entries[i].startTime;
 				}
 			}
@@ -116,13 +116,15 @@
 
 			// Defer guarentees ordered execution
 			deferredScripts.sort(function(a,b){return a.startTime - b.startTime});
-		} else {
+
+            // // We need to interleave async scripts between deferred scripts
+            var interleavedScripts = interleave(asyncScripts, deferredScripts, 'duration');
+            orderedScripts = orderedScripts.concat(interleavedScripts);
+
+        } else {
+            orderedScripts = orderedScripts.concat(asyncScripts).concat(deferredScripts);
 			console.log('Async & Defer Script Execution Order is not accurate - No Resource Timing API Support ')
 		}
-		
-		// // We need to interleave async scripts between deferred scripts
-		var interleavedScripts = interleave(asyncScripts, deferredScripts);
-		orderedScripts = orderedScripts.concat(interleavedScripts);
 
 		return orderedScripts;
 	}
