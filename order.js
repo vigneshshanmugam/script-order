@@ -43,40 +43,51 @@
 		return scripts[type];
 	}
 
-    function interleaveAsyncWithOthers(async, destination) {
-        var i, j;
-        for (i = 0; i < async.length; i++) {
+    function interleaveAsyncWithOthers(asyncScripts, destination) {
+        var i, j, k, tempArr = [];
+        var timing = performance.timing;
+        var domInteractive = timing.domInteractive - timing.navigationStart;
+        for (i = 0; i < asyncScripts.length; i++) {
             for (j = 0; j < destination.length; j++) {
-                if (destination[j].type === 'sync') {
-                    if ((async[i].startTime < destination[j].startTime) && 
-                        (async[i].duration < destination[j].duration)) {
-                        destination.splice(j, 0, async[i]);
-                        async.splice(i, 1);
-                    }
+                if (destination[j].type === 'sync' && destination[j].startTime < domInteractive) {
+                    if ((asyncScripts[i].startTime < destination[j].startTime) && 
+                        (asyncScripts[i].duration < destination[j].duration)) {
+                        destination.splice(j, 0, asyncScripts[i]);
+                        asyncScripts[i].added = true;
+                        break;
+                    } 
                 }
             }
         }
+        k = 0;
+        while (k < asyncScripts.length) {
+            if (!asyncScripts[k].added) {
+                tempArr.push(asyncScripts[k]);
+            }
+            delete asyncScripts[k].added;
+            k++;
+        }
+
         return {
-            async: async,
+            asyncScripts: tempArr,
             interleaved : destination
         };
     }
 
-	function interleaveAsyncWithDefer(async, destination, key) {
+	function interleaveAsyncWithDefer(asyncScripts, destination, key) {
 		var asyncPtr = 0;
 		var destPtr = 0;
-
-		while (asyncPtr < async.length && destPtr < destination.length) {
-			if (async[asyncPtr][key] <= destination[destPtr][key]) {
-				destination.splice(destPtr, 0, async[asyncPtr]);
+		while (asyncPtr < asyncScripts.length && destPtr < destination.length) {
+			if (asyncScripts[asyncPtr][key] <= destination[destPtr][key]) {
+				destination.splice(destPtr, 0, asyncScripts[asyncPtr]);
 				asyncPtr++;
 			} else {
 				destPtr++;
 			}
 		}
 
-		while (asyncPtr < async.length) {
-			destination.push(async[asyncPtr]);
+		while (asyncPtr < asyncScripts.length) {
+			destination.push(asyncScripts[asyncPtr]);
 			asyncPtr++;
 		}
 
@@ -132,7 +143,7 @@
 
         var temp = interleaveAsyncWithOthers(asyncScripts, orderedScripts);
         orderedScripts = temp.interleaved;
-        asyncScripts = temp.async;
+        asyncScripts = temp.asyncScripts;
 
 		// Defer guarentees ordered execution
 		deferredScripts.sort(function(a,b){return a.startTime - b.startTime});
