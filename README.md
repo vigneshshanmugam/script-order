@@ -37,8 +37,8 @@ A UI will be shown on the page like this.
 
 - Works only if `Resource Timing API` is available (since we need to interleve async/defer scripts execution with timing information).
 - Scripts that are blocked(Ad blockers), CSP and Mixed contents are pushed to the end(because PerformanceTimingEntry Object will be empty for them).
+- Not tested Server Push as well.
 
 ### Issues
 
-- Have not tested preload behaviour yet
-- Not tested Server Push as well.
+Check [here](https://github.com/vigneshshanmugam/script-order/issues)

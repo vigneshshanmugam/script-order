@@ -11,7 +11,6 @@
 
 		for (var i = 0; i < scripts.length; i++) {
 			order = i + 1;
-
 			// Remove the bookmarklet script
 			if(scripts[i].src.indexOf('/order.js') !== -1) {
 				continue;
@@ -20,16 +19,16 @@
 			if (scripts[i].src) {
 				// scripts with async & defer set to true is considered to be async
 				if(scripts[i].async) {
-					scriptObj.async.push({name: scripts[i].src, type: 'async', color: 'green' });
+					scriptObj.async.push({name: scripts[i].src, type: 'async', count: order, color: 'green' });
 				} else if(scripts[i].defer) {
-					scriptObj.defer.push({name: scripts[i].src, type: 'defer', color: 'lightgreen' });
+					scriptObj.defer.push({name: scripts[i].src, type: 'defer', count: order, color: 'lightgreen' });
 				} else {
 					scriptObj.blocking.push({name: scripts[i].src, type: 'sync', count: order, color: 'red' });
 				}
 			} else {
 				// Todo - Indentify dynamically inserted scripts in better way
 				if (scripts[i].innerHTML.indexOf('src') === -1) {
-					scriptObj.inline.push({'name': scripts[i].innerHTML, type: 'inline', count: order, color: 'orange' });
+					scriptObj.inline.push({'name': scripts[i].textContent, type: 'inline', count: order, color: 'orange' });
 				}
 			}
 		}
@@ -44,22 +43,41 @@
 		return scripts[type];
 	}
 
-	function interleave(source, destination, key) {
-		var srcPtr = 0;
+    function interleaveAsyncWithOthers(async, destination) {
+        var i, j;
+        for (i = 0; i < async.length; i++) {
+            for (j = 0; j < destination.length; j++) {
+                if (destination[j].type === 'sync') {
+                    if ((async[i].startTime < destination[j].startTime) && 
+                        (async[i].duration < destination[j].duration)) {
+                        destination.splice(j, 0, async[i]);
+                        async.splice(i, 1);
+                    }
+                }
+            }
+        }
+        return {
+            async: async,
+            interleaved : destination
+        };
+    }
+
+	function interleaveAsyncWithDefer(async, destination, key) {
+		var asyncPtr = 0;
 		var destPtr = 0;
 
-		while (srcPtr < source.length && destPtr < destination.length) {
-			if (source[srcPtr][key] <= destination[destPtr][key]) {
-				destination.splice(destPtr, 0, source[srcPtr]);
-				srcPtr++;
+		while (asyncPtr < async.length && destPtr < destination.length) {
+			if (async[asyncPtr][key] <= destination[destPtr][key]) {
+				destination.splice(destPtr, 0, async[asyncPtr]);
+				asyncPtr++;
 			} else {
 				destPtr++;
 			}
 		}
 
-		while (srcPtr < source.length) {
-			destination.push(source[srcPtr]);
-			srcPtr++;
+		while (asyncPtr < async.length) {
+			destination.push(async[asyncPtr]);
+			asyncPtr++;
 		}
 
 		return destination;
@@ -76,14 +94,14 @@
 			}
 		}
 
-		// Scripts that are blocked, CSP, mixed content
+		// Scripts that are blocked, CSP, mixed content - no PerformanceTimingObject
 		var j = 0;
 		while(j < scripts.length) {
 			// Hack - Put them to the end
-			if (!scripts[j].duration || scripts[j].duration === 0) {
+			if (!scripts[j].duration) {
 				scripts[j].duration = 99999;
 			}
-			if (!scripts[j].startTime || scripts[j].startTime === 0) {
+			if (!scripts[j].startTime) {
 				scripts[j].startTime = 99999;
 			}
 			j++;
@@ -96,35 +114,32 @@
 
 		var inlineScripts = getScriptsByType(scripts, 'inline');
 		var blockingScripts = getScriptsByType(scripts, 'blocking');
-		var entries = [];
 		var orderedScripts = [];
-		// Inlinescripts + blockingscripts sorted by order 
-		orderedScripts = inlineScripts.concat(blockingScripts).sort(function(a,b){return a.count - b.count});
-
 		// Async Scripts Order - can be easily measured using Resource Timing API
 		var asyncScripts = getScriptsByType(scripts, 'async');
 		var deferredScripts = getScriptsByType(scripts, 'defer');
+		var entries = w.performance.getEntriesByType('resource');
+        
+        blockingScripts = addTimingInfoToScripts(entries, blockingScripts);
+        // Inlinescripts + blockingscripts sorted by order 
+        orderedScripts = inlineScripts.concat(blockingScripts).sort(function(a,b){return a.count - b.count});
 
-		if(w.performance && w.performance.getEntriesByType) {
-			entries = w.performance.getEntriesByType('resource');
+        asyncScripts = addTimingInfoToScripts(entries, asyncScripts);
+		deferredScripts = addTimingInfoToScripts(entries, deferredScripts);
 
-			asyncScripts = addTimingInfoToScripts(entries, asyncScripts);
-			deferredScripts = addTimingInfoToScripts(entries, deferredScripts);
+		// Executed as soon as they are available
+		asyncScripts.sort(function(a,b){return a.duration - b.duration});
 
-			// Executed as soon as they are available
-			asyncScripts.sort(function(a,b){return a.duration - b.duration});
+        var temp = interleaveAsyncWithOthers(asyncScripts, orderedScripts);
+        orderedScripts = temp.interleaved;
+        asyncScripts = temp.async;
 
-			// Defer guarentees ordered execution
-			deferredScripts.sort(function(a,b){return a.startTime - b.startTime});
+		// Defer guarentees ordered execution
+		deferredScripts.sort(function(a,b){return a.startTime - b.startTime});
 
-            // // We need to interleave async scripts between deferred scripts
-            var interleavedScripts = interleave(asyncScripts, deferredScripts, 'duration');
-            orderedScripts = orderedScripts.concat(interleavedScripts);
-
-        } else {
-            orderedScripts = orderedScripts.concat(asyncScripts).concat(deferredScripts);
-			console.log('Async & Defer Script Execution Order is not accurate - No Resource Timing API Support ')
-		}
+        // We need to interleave async scripts between deferred scripts
+        var interleavedScripts = interleaveAsyncWithDefer(asyncScripts, deferredScripts, 'duration');
+        orderedScripts = orderedScripts.concat(interleavedScripts);
 
 		return orderedScripts;
 	}
@@ -160,6 +175,10 @@
 		console.table(scripts);
 	}
 
-	drawUI();
+    if(w.performance && w.performance.getEntriesByType) {
+        drawUI();
+    } else {
+        console.log('Script Execution Order cannot be calculated - No Resource Timing API Support ')
+    }
 
 })(window, window.document);
