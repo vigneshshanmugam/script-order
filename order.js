@@ -49,7 +49,8 @@
         var domInteractive = timing.domInteractive - timing.navigationStart;
         for (i = 0; i < asyncScripts.length; i++) {
             for (j = 0; j < destination.length; j++) {
-                if (destination[j].type === 'sync' && destination[j].startTime < domInteractive) {
+                if (destination[j].type === 'sync' && destination[j].startTime !== 9999
+                    && destination[j].startTime < domInteractive) {
                     if ((asyncScripts[i].startTime < destination[j].startTime) && 
                         (asyncScripts[i].duration < destination[j].duration)) {
                         destination.splice(j, 0, asyncScripts[i]);

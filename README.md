@@ -35,7 +35,7 @@ A UI will be shown on the page like this.
 
 ### Gotchas
 
-- Works only if `Resource Timing API` is available (since we need to interleve async/defer scripts execution with timing information).
+- Works only if `Resource Timing API` is available (since we need to interleve sync/async/defer scripts execution with timing information).
 - Scripts that are blocked(Ad blockers), CSP and Mixed contents are pushed to the end(because PerformanceTimingEntry Object will be empty for them).
 - Not tested Server Push as well.
 
