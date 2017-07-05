@@ -13,7 +13,7 @@ javascript:(function(d){var el=d.createElement('script');el.type='text/javascrip
 A UI will be shown on the page like this.
 
 ![Script Breakdown]
-(https://github.com/vigneshshanmugam/script-order/blob/master/breakdown.png)
+(https://raw.githubusercontent.com/vigneshshanmugam/script-order/master/breakdown.png)
 
  You can also check devtools console tab to see the order. 
 
